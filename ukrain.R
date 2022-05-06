@@ -160,6 +160,12 @@ plot(ceb, Neural,edge.arrow.size=0.5,vertex.size=Neural_deg*2.5)
 clp <- cluster_label_prop(Neural)
 plot(ceb, Neural,edge.arrow.size=0.5,vertex.size=Neural_deg*2.5)
 
+
+
+
+#*******************************************************************
+
+###                  THIS PART IS NOT YET FINISHED                        #
 #********************************************************
 #*****       Volatility Spillovers and Connectedness *****####
 #*************************************************************
