@@ -69,49 +69,6 @@ stars(R_data1, draw.segments = TRUE, labels = lab, ncol = 5,
 
 
 
-#*******************************
-# **** wavelet analysis **** #####
-#*******************************
-library(biwavelet)
-library(zoo)
-library(xts)
-colnames(R_dataframe) <- c("India","Tether","Ethereum","litecoin","Russia","S&P500",
-                       "Argentina","Mexico","China","Vix","Germany",
-                       "South korea","Turkey","france","UK","Japan",
-                       "Brasil","Indonesia","Canada","italy","Bitcoin")
-t1 <- cbind(1:132,R_dataframe$litecoin)
-t2 <- cbind(1:132,R_dataframe$Canada)
-t1[is.na(t1)] <- 0
-t2[is.na(t2)] <- 0
-
-nrands=100
-sum(is.na(t1))
-sum(is.na(t2))
-
-wtcr <- wtc(t1,t2,nrands=nrands)
-par(mar=c(5,4,5,5),+0.1)
-#par(oma=c(1,1,1,0),mar=c(0,4,0.5,5),+0.1)
-
-plot(wtcr,plot.phase=TRUE,xaxt='n',lty.coi=1,col.coi="grey",lwd.coi=2, 
-     lwd.sig=2, arrow.lwd=0.03, arrow.len=0.08, ylab="Frequency",xlab="Years-Month",
-     plot.cb= T, main="WTC : Litecoin-TSE index", cex.main=0.8)
-
-
-n <- c("2021-06","2021-7","2021-08","2021-09","2021-10","2021-11",
-          "2021-12","2022-01","2022-02","2022-03","2022-04")
-
-axis(1, at = c(seq(0,132,13)), n )
-
-#-----------------export to excel-----------------------####
-library(writexl)  
-nw <- data.frame(date=index(R_data), coredata(R_data)) # add index and convert to dataframe
-colnames(nw) <- c("date","India","Tether","Ethereum","litecoin","Russia","S&P500",
-                           "Argentina","Mexico","China","Vix","Germany",
-                           "South korea","Turkey","france","UK","Japan",
-                           "Brasil","Indonesia","Canada","italy","Bitcoin")
-
-write_xlsx(nw,"NT.xlsx") 
-
 #********************************************************
 # ****   Granger causality Network         ****   ####
 #*********************************************************
@@ -159,75 +116,5 @@ ceb <- cluster_edge_betweenness(Neural)
 plot(ceb, Neural,edge.arrow.size=0.5,vertex.size=Neural_deg*2.5)
 clp <- cluster_label_prop(Neural)
 plot(ceb, Neural,edge.arrow.size=0.5,vertex.size=Neural_deg*2.5)
-
-
-
-
-#*******************************************************************
-
-###                  THIS PART IS NOT YET FINISHED                        #
-#********************************************************
-#*****       Volatility Spillovers and Connectedness *****####
-#*************************************************************
-library(xts)
-library(PerformanceAnalytics)
-library(quantmod)
-datav <- do.call(merge, eapply(envt1, cbind))
-datav <- na.omit(datav)
-v_datav <- 0.361*(log(Hi(datav))-log(Lo(datav)))^2
-volt <- 1/sinh(sqrt(252*v_datav))
-volt[volt == Inf] <- lag(volt)
-volt <- na.omit(volt)
-chart.TimeSeries(volt,lwd=2,auto.grid=F,
-                 ylab="Annualized Log Volatility",xlab="Time",
-                 main="Log Volatility",lty=1,
-                 legend.loc="topright") 
-# ------Step 1. Vector Autoregression (VAR)---------####
-
-library(vars)
-vol_var = VAR(volt,p=3,type="const")
-amat <- diag(ncol(volt))
-amat[lower.tri(amat)] <- NA
-vol_svar = SVAR(vol_var,Amat = amat,estmethod = "direct")
-### extract residuals of the VAR
-res_t <- residuals(vol_var)
-svar_ecov <- vol_svar$Sigma.U
-
-#---------Step 2. Moving Average Representation-------####
-
-MA_lag <- 10
-theta_temp <- Phi(vol_var,nstep = MA_lag)
-svar_theta_temp <- Phi(vol_svar,nstep = MA_lag)
-### extract MA coefficients
-library(plyr)
-theta.list <- alply(theta_temp,3)
-svar_theta_list <- alply(svar_theta_temp,3)
-#--------Step 3. Impulse Response Function (IRF)-------####
-spil <- fevd(vol_var, 10)
-
-#########################spillover Table##################################
-
-library(vars)
-vol_var = VAR(volt,p=3,type="const")
-library(frequencyConnectedness)
-
-spill <- spilloverDY12(vol_var, n.ahead = 100, no.corr=F)
-
-table <-as.data.frame(spill$tables)
-to(spill)
-
-
-
-library(BigVAR)
-data(volatilities)
-big_var_est <- function(data) {
-  Model1 = constructModel(as.matrix(data), p = 4, struct = "Basic", gran = c(50, 50), VARX = list(), verbose = F)
-  Model1Results = cv.BigVAR(Model1)
-}
-
-# Perform the estimation
-oo <- big_var_est(log(volatilities[apply(volatilities>0, 1, all),]))
-
-spilloverDY12(oo, n.ahead = 100, no.corr = F)
 
 
