@@ -1,5 +1,5 @@
 #**********************************************
-# *****       ukrain war    *****    ####
+# *****       u*k*r*a*i*n*e war    *****    ####
 #**********************************************
 
 #************************************************
@@ -70,6 +70,7 @@ stars(R_data1, draw.segments = TRUE, labels = lab, ncol = 10,
      cex=0.5,key.loc = c(7, 0.5), mar = c(4, 0, 0, 0))
 
 
+<<<<<<< HEAD
 #-----------------export to excel-----------------------####
 library(writexl)  
 nw <- data.frame(date=index(R_data), coredata(R_data)) # add index and convert to dataframe
@@ -80,6 +81,8 @@ colnames(nw) <- c("date","Brasil","Indonesia","Naturalgaz","Japan","India","Turk
                   "Suger","Mexico","Litecoin","Russia","Sp500")
 
 write_xlsx(nw,"NT.xlsx") 
+=======
+>>>>>>> 2bbbfa23b568f2fbf294bf0fab580fd8cbdacbd4
 
 #********************************************************
 # ****   Granger causality Network         ****   ####
@@ -129,6 +132,7 @@ plot(ceb, Neural,edge.arrow.size=0.5,vertex.size=Neural_deg*2.5)
 clp <- cluster_label_prop(Neural)
 plot(ceb, Neural,edge.arrow.size=0.5,vertex.size=Neural_deg*2.5)
 
+<<<<<<< HEAD
 
 ########################################################
 #****           Time Varying Parameter *** ###  
@@ -295,4 +299,6 @@ TVPVAR = function(x, configuration=list(l=c(0.99,0.99), nlag=1, prior=NULL)){
 
 
 
+=======
+>>>>>>> 2bbbfa23b568f2fbf294bf0fab580fd8cbdacbd4
 
