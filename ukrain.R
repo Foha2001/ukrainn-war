@@ -46,7 +46,8 @@ desc
 desc <- cbind(rownames(desc),desc)
 library(writexl)
 write_xlsx(desc,"descstatistics.xlsx") 
-
+return <- cbind(rownames(R_dataframe),R_dataframe)
+write_xlsx(return,"return.xlsx")
 
 #********normality test************
 normalTest(R_dataframe$FTSEMIB.MI.Close,method="jb")
@@ -57,26 +58,26 @@ normalTest(R_dataframe$FTSEMIB.MI.Close,method="jb")
 library(fBasics)
 library(xts)
 R_data1 <- R_data[endpoints(R_data,'month')]
-colnames(R_data1) <- c("India","Tether","Ethereum","litecoin","Russia","S&P500",
-                       "Argentina","Mexico","China","Vix","Germany",
-                       "South korea","Turkey","france","UK","Japan",
-                       "Brasil","Indonesia","Canada","italy","Bitcoin")
+colnames(R_data1) <- c("Brasil","Indonesia","Naturalgaz","Japan","India","Turkey",
+                       "China","Bitcoin","France","Silver",
+                       "Italy","UK","Crudeoil","Canada","Germany",
+                       "Argentina","Aluminium","Gold","Southkorea",
+                       "Suger","Mexico","Litecoin","Russia","Sp500")
 lab <- list("2021/06","2021/07","2021/08","2021/09",
             "2021/10","2021/11","2021/12","2022/01",
             "2022/02","2022/03","2022/04")
-stars(R_data1, draw.segments = TRUE, labels = lab, ncol = 5,
+stars(R_data1, draw.segments = TRUE, labels = lab, ncol = 10,
      cex=0.5,key.loc = c(7, 0.5), mar = c(4, 0, 0, 0))
-
-
 
 
 #-----------------export to excel-----------------------####
 library(writexl)  
 nw <- data.frame(date=index(R_data), coredata(R_data)) # add index and convert to dataframe
-colnames(nw) <- c("date","India","Tether","Ethereum","litecoin","Russia","S&P500",
-                           "Argentina","Mexico","China","Vix","Germany",
-                           "South korea","Turkey","france","UK","Japan",
-                           "Brasil","Indonesia","Canada","italy","Bitcoin")
+colnames(nw) <- c("date","Brasil","Indonesia","Naturalgaz","Japan","India","Turkey",
+                  "China","Bitcoin","France","Silver",
+                  "Italy","UK","Crudeoil","Canada","Germany",
+                  "Argentina","Aluminium","Gold","Southkorea",
+                  "Suger","Mexico","Litecoin","Russia","Sp500")
 
 write_xlsx(nw,"NT.xlsx") 
 
