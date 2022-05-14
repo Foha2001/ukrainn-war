@@ -11,9 +11,9 @@ library(xts)
 library(zoo)
 w_indice <- c("^GSPC","000001.SS","^N225","^GDAXI","^NSEI","^FTSE",
               "^FCHI","FTSEMIB.MI","^BVSP","^GSPTSE","^KS11","IMOEX.ME",
-              "^MXX","XU100.IS","M.BA","^JKII","BTC-USD","LTC-USD",
-              "USDT-USD","ETH-USD","CL=F","NG=F","GC=F","ALI=F",
-              "SB=F","SI=F")
+              "^MXX","XU100.IS","M.BA","^JKII","BTC-USD","ETH-USD",
+              "USDT-USD","CL=F","ALI=F","GC=F","SB=F","KE=F", "ZS=F",
+              "ZC=F","NG=F")
 
 
 
@@ -22,8 +22,8 @@ end_date <- Sys.Date()
 envt1 <- new.env()
 getSymbols(w_indice,env=envt1,from=start_date, to=end_date)
 data <- do.call(merge, eapply(envt1, Cl))
-data <- data[,-c(19,24)] #delete 2 unavailable crpto 
-dataframe<- as.data.frame(na.omit (data))  #data before 2007 unavailable for some cripto
+data <- data[,-c(21,25)] #delete Ethereum anf Thether unavailable crpto 
+dataframe<- as.data.frame(na.omit (data))  #data before 2007 unavailable for Ethereum 
 
 #----------------descriptive statistics------------------####
 #*
@@ -43,10 +43,27 @@ desc <- do.call(data.frame,
                     skew = apply(R_dataframe, 2, sampleSKEW),
                     kurt = apply(R_dataframe,2,sampleKURT)))
 desc
+rownames(desc) <- c("Brasil","Indonesia","NG","Soybean","Japan",
+                      "India","Turkey","China","Bitcoin",
+                      "france","Italy","UK","oil","Canada",
+                      "Germany","Agentina","corn","Aluminium",
+                      "Wheat","Gold","Southkorea","Sugar","Mexico",
+                      "Russia","US")
+
+
 desc <- cbind(rownames(desc),desc)
 library(writexl)
 write_xlsx(desc,"descstatistics.xlsx") 
 return <- cbind(rownames(R_dataframe),R_dataframe)
+colnames(return) <- c("date","Brasil","Indonesia","NG","Soybean","Japan",
+                       "India","Turkey","China","Bitcoin",
+                       "france","Italy","UK","oil","Canada",
+                       "Germany","Agentina","corn","Aluminium",
+                       "Wheat","Gold","Southkorea","Sugar","Mexico",
+                      "Russia","US")
+
+
+
 write_xlsx(return,"return.xlsx")
 
 #********normality test************
