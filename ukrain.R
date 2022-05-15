@@ -22,7 +22,7 @@ end_date <- Sys.Date()
 envt1 <- new.env()
 getSymbols(w_indice,env=envt1,from=start_date, to=end_date)
 data <- do.call(merge, eapply(envt1, Cl))
-data <- data[,-c(21,25)] #delete Ethereum anf Thether unavailable crpto 
+#data <- data[,-c(21,25)] #delete Ethereum anf Thether unavailable crpto 
 dataframe<- as.data.frame(na.omit (data))  #data before 2007 unavailable for Ethereum 
 
 #----------------descriptive statistics------------------####
@@ -33,6 +33,13 @@ R_data <- diff(log(datana)) # as zoo
 R_data <- R_data[-1,]
 R_dataframe <- as.data.frame(R_data)
 R_dataframe <- na.omit(R_dataframe)
+colnames(R_dataframe) <- c("Brasil","Indonesia","NaturalGas","Soybean","Japan",
+                      "India","Turkey","China","Bitcoin",
+                      "france","Italy","UK","oil","Canada",
+                      "Germany","Agentina","corn","Aluminium",
+                      "Wheat","Gold","Ethereum","Southkorea","Sugar","Mexico",
+                      "Tehther","Russia","US")
+
 library(fBasics)
 desc <- do.call(data.frame, 
                list(mean = apply(R_dataframe, 2, mean),
@@ -55,16 +62,28 @@ desc <- cbind(rownames(desc),desc)
 library(writexl)
 write_xlsx(desc,"descstatistics.xlsx") 
 return <- cbind(rownames(R_dataframe),R_dataframe)
-colnames(return) <- c("date","Brasil","Indonesia","NG","Soybean","Japan",
-                       "India","Turkey","China","Bitcoin",
-                       "france","Italy","UK","oil","Canada",
-                       "Germany","Agentina","corn","Aluminium",
-                       "Wheat","Gold","Southkorea","Sugar","Mexico",
-                      "Russia","US")
-
-
+colnames(return)[1] <- "Date"
 
 write_xlsx(return,"return.xlsx")
+
+
+########################################################
+#****           Time Varying Parameter *** ###  
+########################################################
+
+var_d <- as.zoo(R_dataframe)
+library(ConnectednessApproach)
+dca = ConnectednessApproach(var_d, 
+                            nlag=1, 
+                            nfore=12,
+                            window.size=100,
+                            model="TVP-VAR",
+                            connectedness="Time",
+                            VAR_config=list(TVPVAR=list(kappa1=0.99, kappa2=0.96, prior="BayesPrior")))
+
+
+
+
 
 #********normality test************
 normalTest(R_dataframe$FTSEMIB.MI.Close,method="jb")
@@ -98,6 +117,16 @@ colnames(nw) <- c("date","Brasil","Indonesia","Naturalgaz","Japan","India","Turk
                   "Suger","Mexico","Litecoin","Russia","Sp500")
 
 write_xlsx(nw,"NT.xlsx") 
+
+
+
+
+
+
+
+
+
+
 
 
 #********************************************************
@@ -150,9 +179,7 @@ plot(ceb, Neural,edge.arrow.size=0.5,vertex.size=Neural_deg*2.5)
 
 
 
-########################################################
-#****           Time Varying Parameter *** ###  
-########################################################
+
 
 
 
