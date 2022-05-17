@@ -68,18 +68,52 @@ write_xlsx(return,"return.xlsx")
 
 
 ########################################################
-#****           Time Varying Parameter *** ###  
+#****           Time Varying Parameter *** #####  
 ########################################################
 
-var_d <- as.zoo(R_dataframe)
+var_d <- read.zoo(return)
 library(ConnectednessApproach)
-dca = ConnectednessApproach(var_d, 
+
+#dy2012 model 
+dy2012 = ConnectednessApproach(var_d, 
+                             nlag=4, 
+                             nfore=100,
+                             model="VAR",
+                             connectedness="Time",
+                             Connectedness_config=list(TimeConnectedness=list(generalized=TRUE)))
+spill2012 <- as.data.frame(dy2012$TABLE)
+spill2012 <- cbind(rownames(spill2012),spill2012)
+library(writexl)
+write_xlsx(spill2012,"spill2012.xlsx")
+#acg2020 model
+acg2020 = ConnectednessApproach(var_d, 
                             nlag=1, 
                             nfore=12,
                             window.size=100,
                             model="TVP-VAR",
                             connectedness="Time",
                             VAR_config=list(TVPVAR=list(kappa1=0.99, kappa2=0.96, prior="BayesPrior")))
+
+spillacg2020 <- as.data.frame(acg2020$TABLE)
+spillacg2020 <- cbind(rownames(spillacg2020),spillacg2020)
+write_xlsx(spillacg2020,"spillacg2020.xlsx")
+
+
+
+PlotTCI(acg2020, ca=DCA, ylim=c(20,100))  #the average
+PlotFROM(acg2020, ylim=c(0,130))
+PlotTO(acg2020, ylim=c(0,200))
+PlotNET(acg2020, ylim=c(-100,100))
+#PlotNPDC(acg2020, ylim=c(-10,20))
+PlotPCI(acg2020)
+#---------------------------------------------------------
+#             Variance measure             #####
+lowp <- do.call(merge, eapply(envt1, Lo))
+hip <- do.call(merge, eapply(envt1, Hi))
+vari <- 0.361*(log(hip)-log(lowp))^2
+
+
+
 
 
 
