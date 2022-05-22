@@ -3,7 +3,7 @@
 #**********************************************
 
 #************************************************
-# ****        import data       ****    ####
+#              import data                     ####
 #*************************************************
 
 library(quantmod)
@@ -50,12 +50,6 @@ desc <- do.call(data.frame,
                     skew = apply(R_dataframe, 2, sampleSKEW),
                     kurt = apply(R_dataframe,2,sampleKURT)))
 desc
-rownames(desc) <- c("Brasil","Indonesia","NG","Soybean","Japan",
-                      "India","Turkey","China","Bitcoin",
-                      "france","Italy","UK","oil","Canada",
-                      "Germany","Agentina","corn","Aluminium",
-                      "Wheat","Gold","Southkorea","Sugar","Mexico",
-                      "Russia","US")
 
 
 desc <- cbind(rownames(desc),desc)
@@ -63,54 +57,184 @@ library(writexl)
 write_xlsx(desc,"descstatistics.xlsx") 
 return <- cbind(rownames(R_dataframe),R_dataframe)
 colnames(return)[1] <- "Date"
-
 write_xlsx(return,"return.xlsx")
+
+#********normality test************##
+normalTest(R_dataframe$US,method="jb")
+
+
+
 
 
 ########################################################
 #****           Time Varying Parameter *** #####  
-########################################################
-
+#########                                               ##
+##               TVP by retutn               ####
 var_d <- read.zoo(return)
 library(ConnectednessApproach)
 
-#dy2012 model 
-dy2012 = ConnectednessApproach(var_d, 
-                             nlag=4, 
-                             nfore=100,
-                             model="VAR",
-                             connectedness="Time",
-                             Connectedness_config=list(TimeConnectedness=list(generalized=TRUE)))
-spill2012 <- as.data.frame(dy2012$TABLE)
-spill2012 <- cbind(rownames(spill2012),spill2012)
-library(writexl)
-write_xlsx(spill2012,"spill2012.xlsx")
+# #dy2012 model 
+# dy2012 = ConnectednessApproach(var_d, 
+#                              nlag=4, 
+#                              nfore=100,
+#                              model="VAR",
+#                              connectedness="Time",
+#                              Connectedness_config=list(TimeConnectedness=list(generalized=TRUE)))
+# spill2012 <- as.data.frame(dy2012$TABLE)
+# spill2012 <- cbind(rownames(spill2012),spill2012)
+# library(writexl)
+# write_xlsx(spill2012,"spill2012.xlsx")
 #acg2020 model
-acg2020 = ConnectednessApproach(var_d, 
-                            nlag=1, 
-                            nfore=12,
-                            window.size=100,
-                            model="TVP-VAR",
-                            connectedness="Time",
-                            VAR_config=list(TVPVAR=list(kappa1=0.99, kappa2=0.96, prior="BayesPrior")))
-
-spillacg2020 <- as.data.frame(acg2020$TABLE)
-spillacg2020 <- cbind(rownames(spillacg2020),spillacg2020)
-write_xlsx(spillacg2020,"spillacg2020.xlsx")
-
-
-
-PlotTCI(acg2020, ca=DCA, ylim=c(20,100))  #the average
-PlotFROM(acg2020, ylim=c(0,130))
-PlotTO(acg2020, ylim=c(0,200))
-PlotNET(acg2020, ylim=c(-100,100))
-#PlotNPDC(acg2020, ylim=c(-10,20))
-PlotPCI(acg2020)
-#---------------------------------------------------------
-#             Variance measure             #####
+# acg2020 = ConnectednessApproach(var_d, 
+#                             nlag=1, 
+#                             nfore=12,
+#                             window.size=100,
+#                             model="TVP-VAR",
+#                             connectedness="Time",
+#                             VAR_config=list(TVPVAR=list(kappa1=0.99, kappa2=0.96, prior="BayesPrior")))
+# 
+# spillacg2020 <- as.data.frame(acg2020$TABLE)
+# spillacg2020 <- cbind(rownames(spillacg2020),spillacg2020)
+# write_xlsx(spillacg2020,"spillacg2020.xlsx")
+# 
+# 
+# 
+# PlotTCI(acg2020, ca=DCA, ylim=c(20,100))  #the average
+# PlotFROM(acg2020, ylim=c(0,130))
+# PlotTO(acg2020, ylim=c(0,200))
+# PlotNET(acg2020, ylim=c(-100,100))
+# #PlotNPDC(acg2020, ylim=c(-10,20))
+# PlotPCI(acg2020)
+#*********************************************************
+#*                    TVP by variance           ####
+#             Variance measure             ###
 lowp <- do.call(merge, eapply(envt1, Lo))
 hip <- do.call(merge, eapply(envt1, Hi))
 vari <- 0.361*(log(hip)-log(lowp))^2
+vari <- na.omit(vari)
+vari <- as.zoo(vari)
+colnames(vari) <- c("Brasil","Indonesia","NaturalGas","Soybean","Japan",
+                             "India","Turkey","China","Bitcoin",
+                             "france","Italy","UK","oil","Canada",
+                             "Germany","Agentina","corn","Aluminium",
+                             "Wheat","Gold","Ethereum","Southkorea","Sugar","Mexico",
+                             "Tehther","Russia","US")
+
+
+acg2020v = ConnectednessApproach(vari, 
+                                nlag=1, 
+                                nfore=12,
+                                window.size=100,
+                                model="TVP-VAR",
+                                connectedness="Time",
+                                VAR_config=list(TVPVAR=list(kappa1=0.99, kappa2=0.96, prior="BayesPrior")))
+spillacg2020v <- as.data.frame(acg2020v$TABLE)
+spillacg2020v <- cbind(rownames(spillacg2020v),spillacg2020v)
+write_xlsx(spillacg2020v,"spillacg2020v.xlsx")
+#Net Total and Net Pairwise Directional Connectedness Measures
+PlotNET(acg2020v,ca=acg2020v, ylim=c(-100,250))
+# Dynamic Total Connectedness
+PlotTCI(acg2020v,ca=acg2020v, ylim=c(10,100))
+# Directional Volatility Spillovers, FROM 
+PlotFROM(acg2020v, ylim=c(0,130))
+# Directional Volatility Spillovers, TO 
+PlotTO(acg2020v, ylim=c(0,300))
+
+
+#------------vari for commodity-------------- 
+varicomm <- vari[,c(13,18,20,23,19,4,17,3)]
+acg2020comm = ConnectednessApproach(varicomm, 
+                                 nlag=1, 
+                                 nfore=12,
+                                 window.size=100,
+                                 model="TVP-VAR",
+                                 connectedness="Time",
+                                 VAR_config=list(TVPVAR=list(kappa1=0.99, kappa2=0.96, prior="BayesPrior")))
+
+spillacg2020comm <- as.data.frame(acg2020comm$TABLE)
+spillacg2020comm <- cbind(rownames(spillacg2020comm),spillacg2020comm)
+write_xlsx(spillacg2020comm,"spillacg2020comm.xlsx")
+#-------------variequity--------------------
+variequity <- vari[,c(27,8,5,15,6,12,10,11,1,14,22,26,24,7,16,2)]
+acg2020equity = ConnectednessApproach(variequity, 
+                                    nlag=1, 
+                                    nfore=12,
+                                    window.size=100,
+                                    model="TVP-VAR",
+                                    connectedness="Time",
+                                    VAR_config=list(TVPVAR=list(kappa1=0.99, kappa2=0.96, prior="BayesPrior")))
+spillacg2020equity <- as.data.frame(acg2020equity$TABLE)
+spillacg2020equity <- cbind(rownames(spillacg2020equity),spillacg2020equity)
+write_xlsx(spillacg2020equity,"spillacg2020equity.xlsx")
+#------------for cryptocurrency--------------------
+
+varicryp <- vari[,c(9,21,25)]
+acg2020cryp = ConnectednessApproach(varicryp, 
+                                      nlag=1, 
+                                      nfore=12,
+                                      window.size=100,
+                                      model="TVP-VAR",
+                                      connectedness="Time",
+                                      VAR_config=list(TVPVAR=list(kappa1=0.99, kappa2=0.96, prior="BayesPrior")))
+spillacg2020cryp <- as.data.frame(acg2020cryp$TABLE)
+spillacg2020cryp <- cbind(rownames(spillacg2020cryp),spillacg2020cryp)
+write_xlsx(spillacg2020cryp,"spillacg2020cryp.xlsx")
+
+
+#*********** apply connectedness between regions *************** ####
+#1
+comm <- varicomm
+comm$commodity <- apply(comm, 1, mean)
+#2
+cryp <- varicryp
+cryp$crypto <- apply(cryp, 1, mean)
+#3
+equiEUR <- variequity[,c(4,6,7,8,12,14)]
+equiEUR$EUR <- apply(equiEUR,1,mean)
+#4
+equiASI <- variequity[,c(2,3,5,11,16)]
+equiASI$asia <- apply(equiASI,1,mean)
+#5
+equiAME <- variequity[,c(1,9,10,13,15)]
+equiAME$america <- apply(equiAME,1,mean)
+
+markets <-cbind(comm$commodity,equiEUR$EUR,equiASI$asia,equiAME$america,
+                cryp$crypto) 
+colnames(markets) <- c("Commoditymarkets","Europemarkets",
+                       "Asianmarkets","Americanmarkets","cryptomarkets")
+
+acg2020markets = ConnectednessApproach(markets, 
+                                   nlag=1, 
+                                   nfore=12,
+                                   window.size=100,
+                                   model="TVP-VAR",
+                                   connectedness="Time",
+                                   VAR_config=list(TVPVAR=list(kappa1=0.99, kappa2=0.96, prior="BayesPrior")))
+spillacg2020markets<- as.data.frame(acg2020markets$TABLE)
+spillacg2020markets <- cbind(rownames(spillacg2020markets),spillacg2020markets)
+write_xlsx(spillacg2020markets,"spillacg2020markets.xlsx")
+
+#Net Total and Net Pairwise Directional Connectedness Measures
+PlotNET(acg2020markets,ylim=c(-20,50))
+# Dynamic Total Connectedness
+PlotTCI(acg2020markets, ylim=c(10,80))
+# Directional Volatility Spillovers, FROM 
+PlotFROM(acg2020markets, ylim=c(0,130))
+# Directional Volatility Spillovers, TO 
+PlotTO(acg2020markets, ylim=c(0,80))
+
+#extract total connectedness (TCI)
+spillacg2020total<- as.data.frame(acg2020markets$TCI)
+spillacg2020total <- cbind(rownames(spillacg2020total),spillacg2020total)
+write_xlsx(spillacg2020total,"spillacg2020total.xlsx")
+#extract from 
+spillacg2020from<- as.data.frame(acg2020markets$FROM)
+spillacg2020from <- cbind(rownames(spillacg2020from),spillacg2020from)
+write_xlsx(spillacg2020from,"spillacg2020from.xlsx")
+#extract NET
+spillacg2020net<- as.data.frame(acg2020markets$NET)
+spillacg2020net <- cbind(rownames(spillacg2020net),spillacg2020net)
+write_xlsx(spillacg2020net,"spillacg2020net.xlsx")
 
 
 
@@ -119,10 +243,6 @@ vari <- 0.361*(log(hip)-log(lowp))^2
 
 
 
-#********normality test************
-normalTest(R_dataframe$FTSEMIB.MI.Close,method="jb")
-
-##*******************************************
 # ****     star and segment plot ****  ####
 #*******************************************
 library(fBasics)
