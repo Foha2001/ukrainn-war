@@ -121,6 +121,9 @@ colnames(vari) <- c("Brasil","Indonesia","NaturalGas","Soybean","Japan",
                              "Tehther","Russia","US")
 
 
+
+
+# connectedness for all ############
 acg2020v = ConnectednessApproach(vari, 
                                 nlag=1, 
                                 nfore=12,
@@ -203,6 +206,11 @@ markets <-cbind(comm$commodity,equiEUR$EUR,equiASI$asia,equiAME$america,
 colnames(markets) <- c("Commoditymarkets","Europemarkets",
                        "Asianmarkets","Americanmarkets","cryptomarkets")
 
+#date before 28novembre2021
+marketbefore <- markets[1:659,]
+marketafter <- markets[660:726,]
+
+
 acg2020markets = ConnectednessApproach(markets, 
                                    nlag=1, 
                                    nfore=12,
@@ -235,9 +243,10 @@ write_xlsx(spillacg2020from,"spillacg2020from.xlsx")
 spillacg2020net<- as.data.frame(acg2020markets$NET)
 spillacg2020net <- cbind(rownames(spillacg2020net),spillacg2020net)
 write_xlsx(spillacg2020net,"spillacg2020net.xlsx")
-
-
-
+#extract to
+spillacg2020to<- as.data.frame(acg2020markets$TO)
+spillacg2020to <- cbind(rownames(spillacg2020to),spillacg2020to)
+write_xlsx(spillacg2020to,"spillacg2020to.xlsx")
 
 
 
